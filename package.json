@@ -1,0 +1,32 @@
+{
+  "name": "google-agent-cache",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/server.js",
+    "setup-cache": "node src/cli/setupCache.js",
+    "list-models": "node src/cli/listModels.js",
+    "list-caches": "node src/cli/listCaches.js",
+    "delete-cache": "node src/cli/deleteCache.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Carlos-vargs/google-agent-cache.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/Carlos-vargs/google-agent-cache/issues"
+  },
+  "homepage": "https://github.com/Carlos-vargs/google-agent-cache#readme",
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "multer": "^1.4.5-lts.1"
+  }
+}

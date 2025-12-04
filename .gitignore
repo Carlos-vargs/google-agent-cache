@@ -1,0 +1,56 @@
+# Dependencies
+node_modules/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+.env.local
+.env.test
+.env.production
+
+# Local cache info
+cache.json
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+logs/
+*.log
+
+# Runtime data
+tmp/
+temp/
+.tmp/
+
+# Coverage and reports
+coverage/
+.nyc_output/
+
+# Build outputs
+dist/
+build/
+.cache/
+
+# Editor/OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Node REPL history
+.node_repl_history
+
+# Lockfiles (optional; uncomment if you avoid committing)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# Test artifacts
+*.tsbuildinfo
+
+# Local data sources (do not commit large or private docs)
+data/cache_sources/**/*
+
