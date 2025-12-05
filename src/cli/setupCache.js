@@ -1,12 +1,7 @@
 import fs from "fs";
 import path from "path";
 import dotenv from "dotenv";
-import {
-  fileManager,
-  cacheManager,
-  genAI,
-  waitForFileReady,
-} from "../services/google.js";
+import { genAI, waitForFileReady } from "../services/google.js";
 import { saveCacheInfo } from "../services/cacheStore.js";
 import fetch from "node-fetch";
 
@@ -112,9 +107,12 @@ async function main() {
         : ext === ".md"
         ? "text/markdown"
         : "application/octet-stream";
-    const upload = await fileManager.uploadFile(filePath, {
-      mimeType: mime,
-      displayName: path.basename(filePath),
+    const upload = await genAI.files.upload({
+      file: filePath,
+      config: {
+        mimeType: mime,
+        displayName: path.basename(filePath),
+      },
     });
     const ready = await waitForFileReady(upload.file.name);
     console.log(`Listo: ${ready.uri}`);
@@ -124,12 +122,14 @@ async function main() {
   console.log("Creando caché de contexto...");
   let cache;
   try {
-    cache = await cacheManager.create({
+    cache = await genAI.caches.create({
       model,
-      displayName,
-      systemInstruction,
-      contents: [{ role: "user", parts }],
-      ttlSeconds,
+      config: {
+        displayName,
+        systemInstruction,
+        contents: [{ role: "user", parts }],
+        ttlSeconds,
+      },
     });
   } catch (err) {
     console.error(
@@ -141,7 +141,10 @@ async function main() {
 
   console.log(`Cache creado: ${cache.name}`);
   // Quick init check
-  genAI.getGenerativeModelFromCachedContent(cache);
+  genAI.models.generateContent({
+    model,
+    config: { cachedContent: cache },
+  });
 
   // Persistir información del caché en cache.json para que el servidor/API lo use
   const info = {

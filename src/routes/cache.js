@@ -1,10 +1,5 @@
 import express from "express";
-import {
-  cacheManager,
-  fileManager,
-  genAI,
-  waitForFileReady,
-} from "../services/google.js";
+import { genAI, waitForFileReady } from "../services/google.js";
 import {
   saveCacheInfo,
   loadCacheInfo,
@@ -48,31 +43,36 @@ router.post("/setup", async (req, res) => {
       "Eres un experto en el dominio del documento. Responde basándote exclusivamente en el documento proporcionado.";
 
     // 1) Upload file
-    const upload = await fileManager.uploadFile(filePath, {
-      mimeType,
-      displayName: displayName || "source-file",
+    const upload = await genAI.files.upload({
+      file: filePath,
+      config: {
+        mimeType,
+        displayName: displayName || "source-file",
+      },
     });
     const readyFile = await waitForFileReady(upload.file.name);
 
     // 2) Create cache
-    const cache = await cacheManager.create({
+    const cache = await genAI.caches.create({
       model: chosenModel,
-      displayName: cacheDisplayName || "Context_Cache",
-      systemInstruction: sysInstr,
-      contents: [
-        {
-          role: "user",
-          parts: [
-            {
-              fileData: {
-                mimeType: readyFile.mimeType,
-                fileUri: readyFile.uri,
+      config: {
+        displayName: cacheDisplayName || "Context_Cache",
+        systemInstruction: sysInstr,
+        contents: [
+          {
+            role: "user",
+            parts: [
+              {
+                fileData: {
+                  mimeType: readyFile.mimeType,
+                  fileUri: readyFile.uri,
+                },
               },
-            },
-          ],
-        },
-      ],
-      ttlSeconds: ttlSeconds ?? 3600,
+            ],
+          },
+        ],
+        ttlSeconds: ttlSeconds ?? 3600,
+      },
     });
 
     // Persist cache info
@@ -84,8 +84,6 @@ router.post("/setup", async (req, res) => {
     };
     await saveCacheInfo(info);
 
-    // Return brief model instance check
-    const modelFromCache = genAI.getGenerativeModelFromCachedContent(cache);
     res.json({ message: "Cache creado", cacheName: cache.name, info });
   } catch (err) {
     console.error("Cache setup error:", err);

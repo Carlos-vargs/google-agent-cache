@@ -2,12 +2,7 @@ import express from "express";
 import multer from "multer";
 import os from "os";
 import { promises as fs } from "fs";
-import {
-  genAI,
-  fileManager,
-  waitForFileReady,
-  cacheManager,
-} from "../services/google.js";
+import { genAI, waitForFileReady } from "../services/google.js";
 import { loadCacheInfo } from "../services/cacheStore.js";
 
 const router = express.Router();
@@ -38,8 +33,10 @@ router.post("/", async (req, res) => {
       });
 
     // Resolve cached content by name
-    const cachedContent = await cacheManager.get(cacheInfo.cacheName);
-    const model = genAI.getGenerativeModelFromCachedContent(cachedContent);
+    const model = genAI.models.generateContent({
+      model: chosenModel,
+      config: { cachedContent: cacheInfo.cacheName },
+    });
 
     const parts = [];
     if (context) parts.push({ text: context });
@@ -48,9 +45,12 @@ router.post("/", async (req, res) => {
     if (Array.isArray(files)) {
       for (const f of files) {
         if (!f?.path || !f?.mimeType) continue;
-        const upload = await fileManager.uploadFile(f.path, {
-          mimeType: f.mimeType,
-          displayName: f.displayName || "chat-file",
+        const upload = await genAI.files.upload({
+          file: f.path,
+          config: {
+            mimeType: f.mimeType,
+            displayName: f.displayName || "chat-file",
+          },
         });
         const ready = await waitForFileReady(upload.file.name);
         parts.push({
@@ -82,6 +82,7 @@ router.post("/", async (req, res) => {
  * campos de formulario esperados
  * @param {string} question (requerido)
  * @param {string} context (opcional)
+ * @param {string} model (opcional) modelo a usar, por defecto "models/gemini-2.5-flash-001"
  * @param {File[]} files archivos: uno o más PDFs u otros tipos compatibles, nombre de campo "files"
  */
 router.post("/upload", upload.array("files", 10), async (req, res) => {
@@ -95,6 +96,7 @@ router.post("/upload", upload.array("files", 10), async (req, res) => {
   try {
     const question = req.body?.question;
     const context = req.body?.context;
+    const chosenModel = req.body?.model || "models/gemini-2.5-flash-001";
     if (!question) {
       await cleanupFiles();
       return res.status(400).json({ error: "question is required" });
@@ -111,16 +113,21 @@ router.post("/upload", upload.array("files", 10), async (req, res) => {
       });
     }
 
-    const cachedContent = await cacheManager.get(cacheInfo.cacheName);
-    const model = genAI.getGenerativeModelFromCachedContent(cachedContent);
+    const model = genAI.models.generateContent({
+      model: chosenModel,
+      config: { cachedContent: cacheInfo.cacheName },
+    });
 
     const parts = [];
     if (context) parts.push({ text: context });
 
     for (const f of req.files || []) {
-      const uploadRes = await fileManager.uploadFile(f.path, {
-        mimeType: f.mimetype || "application/octet-stream",
-        displayName: f.originalname || "chat-file",
+      const uploadRes = await genAI.files.upload({
+        file: f.path,
+        config: {
+          mimeType: f.mimetype || "application/octet-stream",
+          displayName: f.originalname || "chat-file",
+        },
       });
       const ready = await waitForFileReady(uploadRes.file.name);
       parts.push({
