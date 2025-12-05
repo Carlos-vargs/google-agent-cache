@@ -99,9 +99,10 @@ router.post("/setup", async (req, res) => {
  * Descripción: Obtiene la información del caché configurado.
  */
 router.get("/", async (_req, res) => {
-  const info = await loadCacheInfo();
-  if (!info) return res.status(404).json({ error: "No cache configured" });
-  res.json(info);
+  const list = await loadCacheInfo();
+  if (!Array.isArray(list) || list.length === 0)
+    return res.status(404).json({ error: "No cache configured" });
+  res.json(list);
 });
 
 /**

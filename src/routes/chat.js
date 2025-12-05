@@ -28,7 +28,10 @@ router.post("/", async (req, res) => {
     if (!question)
       return res.status(400).json({ error: "question is required" });
 
-    const cacheInfo = await loadCacheInfo();
+    const cacheList = await loadCacheInfo();
+    const cacheInfo = Array.isArray(cacheList)
+      ? cacheList[cacheList.length - 1]
+      : cacheList;
     if (!cacheInfo?.cacheName)
       return res.status(400).json({
         error: "Cache not configured. Run POST /api/cache/setup first.",
@@ -97,7 +100,10 @@ router.post("/upload", upload.array("files", 10), async (req, res) => {
       return res.status(400).json({ error: "question is required" });
     }
 
-    const cacheInfo = await loadCacheInfo();
+    const cacheList = await loadCacheInfo();
+    const cacheInfo = Array.isArray(cacheList)
+      ? cacheList[cacheList.length - 1]
+      : cacheList;
     if (!cacheInfo?.cacheName) {
       await cleanupFiles();
       return res.status(400).json({
