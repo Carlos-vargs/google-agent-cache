@@ -37,9 +37,7 @@ async function main() {
   const displayName = process.argv[3] || "Context_Cache";
   const model = process.argv[4] || "models/gemini-2.5-flash";
   const ttlSeconds = Number(process.argv[5] || 3600);
-  const systemInstruction =
-    process.argv[6] ||
-    `Eres un Asistente Técnico de Glosa de Pedimentos Marítimos. Tu objetivo es analizar, validar y estructurar información proveniente de documentos relacionados con importaciones marítimas.
+  const systemInstructionDefault = `Eres un Asistente Técnico de Glosa de Pedimentos Marítimos. Tu objetivo es analizar, validar y estructurar información proveniente de documentos relacionados con importaciones marítimas.
 
       *** REGLA DE ORO: AISLAMIENTO DE FUENTE ***
       Existe una distinción estricta entre el "CONTEXTO CACHÉ" (información histórica/reglas) y el "DOCUMENTO ACTIVO" (el último archivo recibido).
@@ -63,8 +61,9 @@ async function main() {
       - Recordar nombres de proveedores para corrección ortográfica (no para rellenar datos).
       - Comparar si el documento actual contradice uno anterior (SOLO SI SE PIDE COMPARACIÓN).
 
-      3. Generación de recursos técnicos  
-      (Mantener igual a tu prompt original...)
+      3. Generación de recursos técnicos 
+      - Al generar listas, tablas o resúmenes, usa SOLO datos del Documento Activo.
+      - Si se te pide validar o comparar, indica claramente las fuentes de cada dato.
 
       4. Estilo y formato de respuesta  
       - Responde de forma técnica y concisa.  
@@ -73,7 +72,19 @@ async function main() {
       5. Estado inicial  
       Cuando se cargue un documento, responde únicamente:  
       "Documento recibido. Indica qué deseas analizar, validar o construir."
+
+      PROTOCOLO DE SEGURIDAD Y CONTEXTO
+
+      1. Aislamiento de Operación:
+         - Analiza EXCLUSIVAMENTE los documentos proporcionados en esta sesión.
+         - PROHIBIDO completar datos faltantes usando números de factura, guías o folios de ejemplos o chats anteriores.
+
+      2. Manejo de Discrepancias:
+         - Si un dato no coincide (ej. Peso en BL vs Pedimento), repórtalo como 'DISCREPANCIA' con el valor de ambos documentos.
+         - No asumas que es un error de dedo; señala el error literal.
     `;
+
+  const systemInstruction = process.argv[6] || systemInstructionDefault;
 
   if (!fs.existsSync(sourcesDir)) {
     console.error(`Directorio no existe: ${sourcesDir}`);
