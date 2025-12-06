@@ -32,14 +32,7 @@ router.post("/", async (req, res) => {
         error: "Cache not configured. Run POST /api/cache/setup first.",
       });
 
-    // Resolve cached content by name
-    const model = genAI.models.generateContent({
-      model: chosenModel,
-      config: { cachedContent: cacheInfo.cacheName },
-    });
-
     const parts = [];
-    if (context) parts.push({ text: context });
 
     // Optional per-request files: [{ path, mimeType, displayName? }]
     if (Array.isArray(files)) {
@@ -60,10 +53,14 @@ router.post("/", async (req, res) => {
 
     parts.push({ text: question });
 
-    const result = await model.generateContent({
+    // Resolve cached content by name
+    const response = genAI.models.generateContent({
+      model: chosenModel,
       contents: [{ role: "user", parts }],
+      config: { cachedContent: cacheInfo.cacheName },
     });
-    const text = result?.response?.text?.() || "";
+
+    const text = response?.text?.() || "";
     return res.json({ answer: text });
   } catch (err) {
     console.error("Chat error:", err);
@@ -112,11 +109,6 @@ router.post("/upload", upload.array("files", 10), async (req, res) => {
       });
     }
 
-    const model = genAI.models.generateContent({
-      model: chosenModel,
-      config: { cachedContent: cacheInfo.cacheName },
-    });
-
     const parts = [];
     if (context) parts.push({ text: context });
 
@@ -141,10 +133,13 @@ router.post("/upload", upload.array("files", 10), async (req, res) => {
 
     parts.push({ text: promptArmored });
 
-    const result = await model.generateContent({
+    const response = await model.generateContent({
+      model: chosenModel,
       contents: [{ role: "user", parts }],
+      config: { cachedContent: cacheInfo.cacheName },
     });
-    const text = result?.response?.text?.() || "";
+
+    const text = response?.text?.() || "";
     await cleanupFiles();
     return res.json({ answer: text });
   } catch (err) {
