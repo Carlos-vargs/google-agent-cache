@@ -133,7 +133,7 @@ router.post("/upload", upload.array("files", 10), async (req, res) => {
 
     parts.push({ text: promptArmored });
 
-    const response = await model.generateContent({
+    const response = await genAI.models.generateContent({
       model: chosenModel,
       contents: [{ role: "user", parts }],
       config: { cachedContent: cacheInfo.cacheName },
