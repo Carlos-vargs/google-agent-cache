@@ -5,6 +5,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import { genAI } from "../services/google.js";
 import { loadCacheInfo } from "../services/cacheStore.js";
+import { saveMarkdownAnswer, cleanupFiles } from "../utilities/utils.js";
 
 const router = express.Router();
 const upload = multer({ dest: os.tmpdir() });
@@ -83,19 +84,12 @@ router.post("/", async (req, res) => {
  * @param {File[]} files archivos: uno o más PDFs u otros tipos compatibles, nombre de campo "files"
  */
 router.post("/upload", upload.array("files", 10), async (req, res) => {
-  const cleanupFiles = async () => {
-    try {
-      await Promise.all(
-        (req.files || []).map((f) => fs.unlink(f.path).catch(() => {}))
-      );
-    } catch {}
-  };
   try {
     const question = req.body?.question;
     const context = req.body?.context;
     const chosenModel = req.body?.model || "models/gemini-2.5-pro";
     if (!question) {
-      await cleanupFiles();
+      await cleanupFiles(req.files);
       return res.status(400).json({ error: "question is required" });
     }
 
@@ -104,7 +98,7 @@ router.post("/upload", upload.array("files", 10), async (req, res) => {
       ? cacheList[cacheList.length - 1]
       : cacheList;
     if (!cacheInfo?.cacheName) {
-      await cleanupFiles();
+      await cleanupFiles(req.files);
       return res.status(400).json({
         error: "Cache not configured. Run POST /api/cache/setup first.",
       });
@@ -141,30 +135,15 @@ router.post("/upload", upload.array("files", 10), async (req, res) => {
     });
 
     const text = response.text || "";
-    // Limpiar escapes para Markdown legible
-    const cleanMarkdown = text
-      .replace(/\\n/g, "\n")
-      .replace(/\\"/g, '"')
-      .replace(/\\t/g, "\t");
-    // Generar nombre de archivo único y ruta segura
-    const timestamp = Date.now();
-    const fileName = `answer-${timestamp}.md`;
-    const answerDir = path.join(process.cwd(), "data", "answer");
-    const answerPath = path.join(answerDir, fileName);
-    try {
-      // Verifica que el directorio existe
-      await fs.mkdir(answerDir, { recursive: true });
-      console.log("Intentando guardar respuesta en:", answerPath);
-      await fs.writeFile(answerPath, String(cleanMarkdown), "utf8");
-      console.log("Archivo markdown guardado correctamente:", answerPath);
-    } catch (err) {
-      console.error("Error guardando respuesta markdown:", err);
-    }
-    await cleanupFiles();
+
+    // solo para previsualización en modo test, guardar la respuesta en markdown
+    await saveMarkdownAnswer(text);
+
+    await cleanupFiles(req.files);
     return res.json({ answer: text });
   } catch (err) {
     console.error("Chat upload error:", err);
-    await cleanupFiles();
+    await cleanupFiles(req.files);
     const status = err?.status || 500;
     return res.status(status).json({ error: "Failed to generate answer" });
   }
