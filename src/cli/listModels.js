@@ -34,9 +34,7 @@ async function main() {
     const data = await resp.json();
     const models = data.models || [];
     for (const m of models) {
-      const name = m.name || m.id || "(sin nombre)";
-      const caps = m.supportedGenerationMethods || m.supportedMethods || [];
-      console.log(`- ${name}${caps.length ? ` [${caps.join(", ")}]` : ""}`);
+      console.log({ model: m });
     }
   } catch (e) {
     console.warn("No se pudo listar modelos:", e?.message || e);
