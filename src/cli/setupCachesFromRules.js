@@ -10,7 +10,7 @@ dotenv.config();
 const rulesPath = path.resolve(process.cwd(), "src/prompts/master-rules.json");
 // Directorio base para las fuentes de datos
 const baseDir = path.resolve(process.cwd(), "data/cache_sources");
-const model = process.argv[2] || "models/gemini-2.5-flash";
+const model = process.argv[2] || "models/gemini-2.5-pro";
 const ttlSeconds = Number(process.argv[3] || 3600);
 
 /**

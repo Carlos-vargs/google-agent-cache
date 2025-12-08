@@ -16,7 +16,7 @@ const router = express.Router();
  * @param {string} filePath (requerido) - Ruta local del archivo a subir
  * @param {string} mimeType (requerido) - Tipo MIME del archivo
  * @param {string} displayName (opcional) - Nombre para el archivo subido
- * @param {string} model (opcional) - Modelo generativo a usar (default: "models/gemini-2.5-flash-001")
+ * @param {string} model (opcional) - Modelo generativo a usar (default: "models/gemini-2.5-pro")
  * @param {number} ttlSeconds (opcional) - Tiempo de vida del caché en segundos (default: 3600)
  * @param {string} systemInstruction (opcional) - Instrucción del sistema para el caché
  * @param {string} cacheDisplayName (opcional) - Nombre para el caché creado
@@ -37,7 +37,7 @@ router.post("/setup", async (req, res) => {
         .status(400)
         .json({ error: "filePath and mimeType are required" });
 
-    const chosenModel = model || "models/gemini-2.5-flash-001";
+    const chosenModel = model || "models/gemini-2.5-pro";
     const sysInstr =
       systemInstruction ||
       "Eres un experto en el dominio del documento. Responde basándote exclusivamente en el documento proporcionado.";
