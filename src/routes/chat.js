@@ -2,6 +2,7 @@ import express from "express";
 import multer from "multer";
 import os from "os";
 import { promises as fs } from "fs";
+import path from "path";
 import { genAI } from "../services/google.js";
 import { loadCacheInfo } from "../services/cacheStore.js";
 
@@ -54,13 +55,13 @@ router.post("/", async (req, res) => {
     parts.push({ text: question });
 
     // Resolve cached content by name
-    const response = genAI.models.generateContent({
+    const response = await genAI.models.generateContent({
       model: chosenModel,
       contents: [{ role: "user", parts }],
       config: { cachedContent: cacheInfo.cacheName },
     });
 
-    const text = response?.text?.() || "";
+    const text = response?.text || "";
     return res.json({ answer: text });
   } catch (err) {
     console.error("Chat error:", err);
@@ -78,7 +79,7 @@ router.post("/", async (req, res) => {
  * campos de formulario esperados
  * @param {string} question (requerido)
  * @param {string} context (opcional)
- * @param {string} model (opcional) modelo a usar, por defecto "models/gemini-2.5-flash-001"
+ * @param {string} model (opcional) modelo a usar, por defecto "models/gemini-2.5-pro"
  * @param {File[]} files archivos: uno o más PDFs u otros tipos compatibles, nombre de campo "files"
  */
 router.post("/upload", upload.array("files", 10), async (req, res) => {
@@ -92,7 +93,7 @@ router.post("/upload", upload.array("files", 10), async (req, res) => {
   try {
     const question = req.body?.question;
     const context = req.body?.context;
-    const chosenModel = req.body?.model || "models/gemini-2.5-flash-001";
+    const chosenModel = req.body?.model || "models/gemini-2.5-pro";
     if (!question) {
       await cleanupFiles();
       return res.status(400).json({ error: "question is required" });
@@ -139,7 +140,26 @@ router.post("/upload", upload.array("files", 10), async (req, res) => {
       config: { cachedContent: cacheInfo.cacheName },
     });
 
-    const text = response?.text?.() || "";
+    const text = response.text || "";
+    // Limpiar escapes para Markdown legible
+    const cleanMarkdown = text
+      .replace(/\\n/g, "\n")
+      .replace(/\\"/g, '"')
+      .replace(/\\t/g, "\t");
+    // Generar nombre de archivo único y ruta segura
+    const timestamp = Date.now();
+    const fileName = `answer-${timestamp}.md`;
+    const answerDir = path.join(process.cwd(), "data", "answer");
+    const answerPath = path.join(answerDir, fileName);
+    try {
+      // Verifica que el directorio existe
+      await fs.mkdir(answerDir, { recursive: true });
+      console.log("Intentando guardar respuesta en:", answerPath);
+      await fs.writeFile(answerPath, String(cleanMarkdown), "utf8");
+      console.log("Archivo markdown guardado correctamente:", answerPath);
+    } catch (err) {
+      console.error("Error guardando respuesta markdown:", err);
+    }
     await cleanupFiles();
     return res.json({ answer: text });
   } catch (err) {
