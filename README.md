@@ -24,7 +24,7 @@ Configuración:
 - npm install
 - Crea y coloca tus fuentes en data/cache_sources/ (PDF, TXT, MD, etc.).
 - Configura caché por CLI: npm run setup-cache [sourcesDir] [displayName] [model] [ttlSeconds] [systemInstruction]
-  Ejemplo: npm run setup-cache data/cache_sources "Cache_Experto" models/gemini-2.5-flash-001 3600 "Eres experto en aduanas..."
+  Ejemplo: npm run setup-cache data/cache_sources "Cache_Experto" models/gemini-2.5-pro 3600 "Eres experto en aduanas..."
 - npm run start
 
 Healthcheck:
@@ -72,11 +72,11 @@ CLI
   - Parámetros:
     - `sourcesDir` (opcional, por defecto `data/cache_sources`)
     - `displayName` (opcional, por defecto `Context_Cache`)
-    - `model` (opcional, por defecto `models/gemini-2.5-flash`)
+    - `model` (opcional, por defecto `models/gemini-2.5-pro`)
     - `ttlSeconds` (opcional, por defecto `3600`)
     - `systemInstruction` (opcional)
   - Ejemplo:
-    - `npm run setup-cache -- data/cache_sources "Cache_Experto" models/gemini-2.5-flash 3600 "Eres experto en aduanas..."`
+    - `npm run setup-cache -- data/cache_sources "Cache_Experto" models/gemini-2.5-pro 3600 "Eres experto en aduanas..."`
 
 - list-caches
 
