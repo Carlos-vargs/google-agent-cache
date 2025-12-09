@@ -132,12 +132,12 @@ async function main() {
 
     1. Título: "REPORTE DE GLOSA: PEDIMENTO <NUMERO>"
     2. Secciones numeradas para cada área:
-       1. RRNA / SENASICA (Folio 200 o 500)
-       2. LOGÍSTICA Y TRANSPORTE (BL MAERSK)
-       3. VALORACIÓN Y FINANZAS (Factura Comercial + Flete)
-       4. ORIGEN (Certificado Alianza Pacífico)
-       5. DIGITALIZACIÓN (E-Documents)
-       6. FITOSANITARIO (Identificación)
+       1. 📜 RRNA / SENASICA (Folio 200 o 500)
+       2. 🚢 LOGÍSTICA Y TRANSPORTE (BL MAERSK)
+       3. 💰 VALORACIÓN Y FINANZAS (Factura Comercial + Flete)
+       4. 🌍 ORIGEN (Certificado Alianza Pacífico)
+       5. 📄 DIGITALIZACIÓN (E-Documents)
+       6. 🌿 FITOSANITARIO (Identificación)
     3. Cada sección debe incluir:
        - Documento: nombre del archivo
        - Cruce: campos comparados y resultado (COINCIDE, DISCREPANCIA, No encontrado)
@@ -153,6 +153,10 @@ async function main() {
        - Mostrar valores comparados tal cual aparecen
        - Reportar cualquier variación como: DISCREPANCIA (mostrar ambos valores)
        - Si un dato falta, indicar explícitamente: 'No encontrado en el documento actual'
+       - Utilizar íconos de semáforo para resultados:
+         - ✅ **COINCIDE**: Para aprobación o correcto.
+         - ❌ **DISCREPANCIA**: Para error o incorrecto.
+         - ⚠️ **No encontrado**: Para datos no localizados.
 
     RECORDATORIO FINAL DE SEGURIDAD
      Nunca suplir datos faltantes con información externa.

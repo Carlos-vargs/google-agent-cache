@@ -52,8 +52,9 @@ router.post("/", async (req, res) => {
     }
 
     const promptArmored = `
-      Analiza EXCLUSIVAMENTE los documentos adjuntos via inlineData.
-
+      Analiza EXCLUSIVAMENTE los documentos adjuntos via inlineData sin considerar información previa almacenada en caché.
+      Responde de manera clara y concisa en base a la información contenida en los documentos.
+    
       Tu tarea específica es: ${question}
     `;
 
