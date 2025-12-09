@@ -23,67 +23,72 @@ Un servidor Express listo para chatear con Gemini usando Context Cache: sube tus
 
 ---
 
-## 🧠 Qué es y cómo funciona
+## 🧩 API (endpoints)
 
-1. Entrena un Context Cache subiendo tus archivos. 2) El nombre del caché se guarda localmente. 3) Cada chat reutiliza ese contexto y puedes añadir contexto y archivos adicionales por request.
+### 1️⃣ Context Cache
+
+```http
+POST /api/cache/setup
+```
+
+```json
+{
+  "filePath": "string",
+  "mimeType": "string",
+  "displayName": "string",
+  "model": "string",
+  "ttlSeconds": "number",
+  "systemInstruction": "string",
+  "cacheDisplayName": "string"
+}
+```
+
+> Sube el archivo, espera el procesamiento, crea el caché remoto y guarda el nombre en cache.json
+
+```http
+GET /api/cache
+```
+
+> Información del caché guardado
+
+```http
+DELETE /api/cache
+```
+
+> Elimina la referencia local (no borra el caché remoto)
 
 ---
 
-## ⚙️ Instalación rápida
+### 2️⃣ Chat
 
-<div align="center">
-  <img src="https://img.shields.io/badge/Instalaci%C3%B3n-F%C3%A1cil-00C853?style=for-the-badge" alt="Instalación fácil" />
-</div>
-
-### 1️⃣ Instala dependencias
-
-```bash
-npm install
+```http
+POST /api/chat
 ```
 
-### 2️⃣ Crea tu archivo de entorno
-
-```bash
-# Crea .env con tu GEMINI_API_KEY
-cp .env.example .env
+```json
+{
+  "question": "string", // requerido
+  "cache": "string", // opcional, nombre del caché
+  "model": "string", // opcional, modelo a usar
+  "files": [
+    // opcional, rutas de archivos locales o URLs
+    "data/cache_sources/mi-archivo.pdf"
+  ]
+}
 ```
 
-### 3️⃣ Coloca tus fuentes
-
-```bash
-# Copia tus archivos (.pdf, .txt, .md, ...) en:
-data/cache_sources/
-```
+> Usa el caché como contexto base y puede adjuntar archivos adicionales (PDF, TXT, MD) como rutas locales o URLs.
 
 ---
 
-### 🚀 Arranca el servidor
+### 3️⃣ Healthcheck
 
-```bash
-npm run start
+```http
+GET /health
 ```
 
----
+> Devuelve `{ status: 'ok' }` si el servidor está activo.
 
-### 🛠️ Configura el caché por CLI
-
-```bash
-npm run setup-cache -- [sourcesDir] [displayName] [model] [ttlSeconds] [systemInstruction]
-```
-
-Ejemplo:
-
-```bash
-npm run setup-cache -- data/cache_sources "Cache_Experto" models/gemini-2.5-pro 3600 "Eres experto en aduanas..."
-```
-
----
-
-## 🔐 Configuración (.env)
-
-- GEMINI_API_KEY=tu_api_key
-- CACHE_NAME=tu_nombre_de_cache
-- MODEL_NAME=models/gemini-2.5-pro
 - PORT=3000
 
 Modelos: usa uno que soporte createCachedContent (por ejemplo models/gemini-2.5-pro).
@@ -98,22 +103,74 @@ GET /health → { status: 'ok' }
 
 ## 🧩 API (endpoints)
 
-### 1) Context Cache
+### 1️⃣ Context Cache
 
-- POST /api/cache/setup
-  - body: { filePath: string, mimeType: string, displayName?, model?, ttlSeconds?, systemInstruction?, cacheDisplayName? }
-  - Sube el archivo, espera el procesamiento, crea el caché remoto y guarda el nombre en cache.json
-- GET /api/cache → Información del caché guardado
-- DELETE /api/cache → Elimina la referencia local (no borra el caché remoto)
+```http
+POST /api/cache/setup
+```
 
-### 2) Chat
+```json
+{
+  "filePath": "string",
+  "mimeType": "string",
+  "displayName": "string",
+  "model": "string",
+  "ttlSeconds": "number",
+  "systemInstruction": "string",
+  "cacheDisplayName": "string"
+}
+```
 
-- POST /api/chat
-  - body: { question: string, context?: string, files?: [{ path: string, mimeType: string, displayName?: string }] }
-  - Usa el caché como contexto base + contexto/archivos opcionales
-- POST /api/chat/upload (multipart/form-data)
-  - fields: question (requerido), context (opcional)
-  - files: múltiples PDFs/TXT/MD en el campo files; se suben a Gemini y se añaden al prompt
+> Sube el archivo, espera el procesamiento, crea el caché remoto y guarda el nombre en cache.json
+
+```http
+GET /api/cache
+```
+
+> Información del caché guardado
+
+```http
+DELETE /api/cache
+```
+
+> Elimina la referencia local (no borra el caché remoto)
+
+---
+
+### 2️⃣ Chat
+
+```http
+POST /api/chat
+```
+
+```json
+{
+  "question": "string",
+  "context": "string",
+  "files": [
+    {
+      "path": "string",
+      "mimeType": "string",
+      "displayName": "string"
+    }
+  ]
+}
+```
+
+> Usa el caché como contexto base + contexto/archivos opcionales
+
+```http
+POST /api/chat/upload (multipart/form-data)
+```
+
+**fields:**
+
+- `question` (requerido)
+- `context` (opcional)
+
+**files:**
+
+- múltiples PDFs/TXT/MD en el campo `files`; se suben a Gemini y se añaden al prompt
 
 ---
 
