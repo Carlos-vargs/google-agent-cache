@@ -1,10 +1,13 @@
 import express from "express";
+import dotenv from "dotenv";
 import { genAI } from "../services/google.js";
 import {
   saveCacheInfo,
   loadCacheInfo,
   clearCacheInfo,
 } from "../services/cacheStore.js";
+
+dotenv.config();
 
 const router = express.Router();
 
@@ -37,7 +40,7 @@ router.post("/setup", async (req, res) => {
         .status(400)
         .json({ error: "filePath and mimeType are required" });
 
-    const chosenModel = model || "models/gemini-2.5-pro";
+    const chosenModel = model || process.env.MODEL_NAME;
     const sysInstr =
       systemInstruction ||
       "Eres un experto en el dominio del documento. Responde basándote exclusivamente en el documento proporcionado.";

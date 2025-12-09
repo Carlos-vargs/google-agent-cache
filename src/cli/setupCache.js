@@ -66,7 +66,7 @@ async function main() {
   const sourcesDir =
     process.argv[2] || path.resolve(process.cwd(), "data/rules");
   const displayName = sanitizeString(process.argv[3] || "Context_Cache");
-  const model = process.argv[4] || "models/gemini-2.5-pro";
+  const model = process.argv[4] || process.env.MODEL_NAME;
   const ttlSeconds = Number(process.argv[5] || 3600);
   const systemInstructionDefault = `
     Eres un Asistente Técnico Especializado en Glosa de Pedimentos Marítimos. Tu objetivo es analizar, validar y estructurar información proveniente exclusivamente de documentos relacionados con importaciones marítimas.
@@ -277,7 +277,7 @@ async function main() {
     ttlSeconds,
   };
   try {
-    await saveCacheInfo(info);
+    await saveCacheInfo([info]);
     console.log("✓ Cache info guardada en cache.json");
   } catch (e) {
     console.warn("⚠ No se pudo guardar cache.json:", e?.message || e);
