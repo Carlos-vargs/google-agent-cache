@@ -159,21 +159,6 @@ POST /api/chat
 
 > Usa el caché como contexto base + contexto/archivos opcionales
 
-```http
-POST /api/chat/upload (multipart/form-data)
-```
-
-**fields:**
-
-- `question` (requerido)
-- `context` (opcional)
-
-**files:**
-
-- múltiples PDFs/TXT/MD en el campo `files`; se suben a Gemini y se añaden al prompt
-
----
-
 ## 🛠️ CLI (comandos)
 
 | Comando      | Descripción                           | Uso                                                                            |
@@ -218,16 +203,6 @@ curl -X POST http://localhost:3000/api/chat \
       "displayName": "mi-archivo.pdf"
     }]
   }'
-```
-
-Subiendo PDFs desde el cliente (multipart/form-data):
-
-```bash
-curl -X POST http://localhost:3000/api/chat/upload \
-  -F "question=¿Qué BL aplica?" \
-  -F "context=Embarque MX-001" \
-  -F "files=@data/cache_sources/ejemplo1.pdf;type=application/pdf" \
-  -F "files=@data/cache_sources/ejemplo2.pdf;type=application/pdf"
 ```
 
 ---
