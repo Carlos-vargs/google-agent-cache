@@ -59,14 +59,15 @@ router.post("/", async (req, res) => {
 
     parts.push({ text: promptArmored });
 
-    const referenceParts = await getReferenceImageParts();
+    // const referenceParts = await getReferenceImageParts(); // solo si se quieren incluir imagenes de referencia
 
     const response = await genAI.models.generateContent({
       model: chosenModel,
       contents: [
         {
           role: "model",
-          parts: [{ text: systemInstructionDefault }, ...referenceParts],
+          // parts: [{ text: systemInstructionDefault }, ...referenceParts], // esto es para incluir imagenes de referencia
+          parts: [{ text: systemInstructionDefault }],
         },
         { role: "user", parts },
       ],
