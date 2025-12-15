@@ -4,6 +4,7 @@ import {
   saveMarkdownAnswer,
   systemInstructionDefault,
   urlToBase64,
+  getReferenceImageParts,
 } from "../utilities/utils.js";
 
 const router = express.Router();
@@ -58,10 +59,15 @@ router.post("/", async (req, res) => {
 
     parts.push({ text: promptArmored });
 
+    const referenceParts = await getReferenceImageParts();
+
     const response = await genAI.models.generateContent({
       model: chosenModel,
       contents: [
-        { role: "model", parts: [{ text: systemInstructionDefault }] },
+        {
+          role: "model",
+          parts: [{ text: systemInstructionDefault }, ...referenceParts],
+        },
         { role: "user", parts },
       ],
     });
